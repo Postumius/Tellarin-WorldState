@@ -1,22 +1,3 @@
-
-def multiBaseAddition(xs, ys, bs):
-
-    def tail(ls):
-        cp = ls.copy()
-        cp.pop(0)
-        return cp
-
-    if len(bs) == 0:
-        return [ xs[0] + ys[0] ]
-    else:
-        rest = multiBaseAddition(
-            tail(xs), tail(ys), tail(bs))
-        return [
-            xs[0] + ys[0] + rest[0] // bs[0],
-            rest[0] % bs[0]
-        ] + tail(rest)
-
-
 class HypDate:
 
     def __init__(
@@ -33,21 +14,37 @@ class HypDate:
         self.day = day
         self.hour = hour
         self.minute = minute
-
     
     def plus(self, other):
-        minuteSum = self.minute + other.minute
-        hourSum = self.hour + other.hour + minuteSum // 60
-        daySum = self.day + other.day + hourSum // 24
-        cycleSum = self.cycle + other.cycle + daySum // 10
-        seasonSum = self.season + other.season + cycleSum // 9
-        yearSum = self.year + other.year + seasonSum // 4
-        return HypDate(yearSum, seasonSum % 4, 
-            cycleSum % 9, daySum % 10)
+        def multiBaseAddition(xs, ys, bs):
+            def tail(ls):
+                cp = ls.copy()
+                cp.pop(0)
+                return cp
+
+            if len(bs) == 0:
+                return [ xs[0] + ys[0] ]
+            else:
+                rest = multiBaseAddition(
+                    tail(xs), tail(ys), tail(bs))
+                return [
+                    xs[0] + ys[0] + rest[0] // bs[0],
+                    rest[0] % bs[0]
+                ] + tail(rest)
+
+        return HypDate.fromList(multiBaseAddition(
+            self.toList(),
+            other.toList(),
+            [4, 9, 10, 24, 60]
+        ))
     
     def toList(self): 
         return [self.year, self.season, self.cycle, self.day,
             self.hour, self.minute]
+
+    @staticmethod
+    def fromList(ls):        
+        return HypDate(ls[0], ls[1], ls[2], ls[3], ls[4], ls[5])
 
     def seasonName(self):
         return['Seed', 'Harvest', 'Scorch', 'Frost'][self.season]
@@ -67,6 +64,12 @@ class HypDate:
         return '{} {} of {}, {} YoR'.format(
             self.cycleName(), self.dayName(), 
             self.seasonName(), str(self.year))
+
+    def timeName(self):
+        return '{}:{}'.format(
+            str(self.hour).zfill(2),
+            str(self.minute).zfill(2)
+        )
         
 
     
