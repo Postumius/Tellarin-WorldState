@@ -42,8 +42,14 @@ displayColumn = [
 
 dayList = []
 for dayName in hd.dayNames:
-    dayList.append(sg.Text(dayName, font=('helvetica', 35), 
-        key=dayName, pad=(10,0)))
+    dayList.append(
+        sg.Column(
+            [[
+                sg.Text(dayName, font=('helvetica', 35), 
+                    key=dayName,)
+            ]],
+            expand_x=True, element_justification='center'
+        ))
 
 displayLayout = [ 
     dayList,
