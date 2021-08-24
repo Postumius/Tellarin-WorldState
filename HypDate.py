@@ -1,3 +1,7 @@
+dayNames = ['Silth', 'Est', 'Kross', 'Oust', 'Rest', 'Streth', 
+            'Eith', 'Kesh', 'Orseh', 'Rath']
+
+
 class HypDate:
 
     def __init__(
@@ -57,8 +61,7 @@ class HypDate:
         }.get(self.cycle, str(self.cycle + 1) + 'th')
 
     def dayName(self):
-        return ['Silth', 'Est', 'Kross', 'Oust', 'Rest', 'Streth', 
-            'Eith', 'Kesh', 'Orseh', 'Rath'][self.day]
+        return dayNames[self.day]
 
     def dateName(self):
         return '{} {} of {}, {} YoR'.format(

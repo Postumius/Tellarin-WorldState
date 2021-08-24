@@ -1,6 +1,7 @@
+from tkinter import font
 from typing import Text
 import PySimpleGUI as sg
-from PySimpleGUI.PySimpleGUI import Button 
+from PySimpleGUI.PySimpleGUI import Button, theme_background_color 
 import HypDate as hd
 import Saving
 
@@ -25,11 +26,12 @@ controlLayout = [
      sg.Button('Next', key='nextHour')],
     [sg.Text('Weather:'), sg.Input(size=(25,1), key='weather')],
     [sg.Text('Location:'), sg.Input(size=(25,1), key='location')],
+    [sg.Button('Bring to Front'), sg.Button('Send to Back')],
     [sg.Button('Update'), sg.Button('Close')]
 ]
 controlWindow = sg.Window('Controls', controlLayout)
 
-displayColumn = [
+displayColumn = [    
     [sg.Text('Date: '), 
      sg.Text(today.dateName(), size=(25,1), key='date')],
     [sg.Text('Hour: '),
@@ -38,7 +40,13 @@ displayColumn = [
     [sg.Text('Location: '), sg.Text(size=(25,1), key='location')]
 ]
 
+dayList = []
+for dayName in hd.dayNames:
+    dayList.append(sg.Text(dayName, font=('helvetica', 35), 
+        key=dayName, pad=(10,0)))
+
 displayLayout = [ 
+    dayList,
     [sg.Text(key='-EXPAND-', font='ANY 1', pad=(0, 0))],
     [sg.Column(displayColumn, vertical_alignment='center', key='-C-')]
 ]
@@ -61,18 +69,25 @@ def updateControl():
         controlWindow['day'].update(str(today.day+1))
         controlWindow['hour'].update(str(today.hour))
 
+displayWindow[today.dayName()].update(background_color='black')
+
 while True:
     event, values = controlWindow.read()
+    displayWindow[today.dayName()].update(background_color=theme_background_color())  
     if event == sg.WIN_CLOSED or event == 'Close':
         break
-    elif event == 'nextDay':        
-        today = today.plus(hd.HypDate(day=1))  
+    elif event == 'nextDay':               
+        today = today.plus(hd.HypDate(day=1))                 
     elif event == 'prevDay':        
         today = today.plus(hd.HypDate(day=-1))
     elif event == 'nextHour':        
         today = today.plus(hd.HypDate(hour=1))  
     elif event == 'prevHour':        
         today = today.plus(hd.HypDate(hour=-1))
+    elif event == 'Bring to Front':
+        displayWindow.BringToFront()
+    elif event == 'Send to Back':
+        displayWindow.SendToBack()
         
     else:
         try:
@@ -107,6 +122,7 @@ while True:
     displayWindow['hour'].update(str(today.hour))
     displayWindow['weather'].update(values['weather'])
     displayWindow['location'].update(values['location'])
+    displayWindow[today.dayName()].update(background_color='black')
 
 Saving.save(today.toList())
 controlWindow.close()
