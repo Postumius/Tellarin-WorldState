@@ -1,7 +1,7 @@
 from tkinter import font
 from typing import Text
 import PySimpleGUI as sg
-from PySimpleGUI.PySimpleGUI import Button, theme_background_color 
+from PySimpleGUI.PySimpleGUI import Button, theme_background_color, theme_button_color, theme_element_background_color, theme_element_text_color, theme_input_background_color, theme_slider_color, theme_text_element_background_color 
 import HypDate as hd
 import Saving
 
@@ -75,7 +75,7 @@ def updateControl():
         controlWindow['day'].update(str(today.day+1))
         controlWindow['hour'].update(str(today.hour))
 
-displayWindow[today.dayName()].update(background_color='black')
+displayWindow[today.dayName()].update(background_color=theme_button_color()[1])
 
 while True:
     event, values = controlWindow.read()
@@ -128,7 +128,8 @@ while True:
     displayWindow['hour'].update(str(today.hour))
     displayWindow['weather'].update(values['weather'])
     displayWindow['location'].update(values['location'])
-    displayWindow[today.dayName()].update(background_color='black')
+    displayWindow[today.dayName()].update(
+        background_color=theme_button_color()[1])
 
 Saving.save(today.toList())
 controlWindow.close()
