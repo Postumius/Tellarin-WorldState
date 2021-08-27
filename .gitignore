@@ -1,2 +1,3 @@
 *.pyc
 today.txt
+__pycache__
