@@ -5,7 +5,8 @@ from PySimpleGUI.PySimpleGUI import Button, theme_background_color, theme_button
 import HypDate as hd
 import Saving
 
-today = hd.HypDate.fromList(Saving.load())
+(ls, weather, location) = Saving.load()
+today = hd.HypDate.fromList(ls)
 
 controlLayout = [
     [sg.Text('year:'), sg.Input(size=(5,1), key='year',
@@ -24,8 +25,12 @@ controlLayout = [
         default_text=str(today.hour)),
      sg.Button('Prev', key='prevHour'), 
      sg.Button('Next', key='nextHour')],
-    [sg.Text('Weather:'), sg.Input(size=(25,1), key='weather')],
-    [sg.Text('Location:'), sg.Input(size=(25,1), key='location')],
+    [sg.Text('Weather:'), 
+     sg.Input(size=(25,1), key='weather',
+        default_text=weather)],
+    [sg.Text('Location:'), 
+     sg.Input(size=(25,1), key='location',
+        default_text=location)],
     [sg.Button('Bring to Front'), sg.Button('Send to Back')],
     [sg.Button('Update'), sg.Button('Close')]
 ]
@@ -36,8 +41,10 @@ displayColumn = [
      sg.Text(today.dateName(), size=(25,1), key='date')],
     [sg.Text('Hour: '),
      sg.Text(str(today.hour), size=(25,1), key='hour')],
-    [sg.Text('Weather: '), sg.Text(size=(25,1), key='weather')],
-    [sg.Text('Location: '), sg.Text(size=(25,1), key='location')]
+    [sg.Text('Weather: '), 
+     sg.Text(weather, size=(25,1), key='weather')],
+    [sg.Text('Location: '), 
+     sg.Text(location, size=(25,1), key='location')]
 ]
 
 dayList = []
@@ -64,22 +71,40 @@ displayWindow = sg.Window('Display', displayLayout,
     element_padding=(0,15))
 
 displayWindow['-C-'].expand(True, True, True)
-displayWindow['-EXPAND-'].expand(True, True, True)
+displayWindow['-EXPAND-'].expand(True, True, True)       
 
-def updateControl():
-        controlWindow['year'].update(str(today.year))
-        controlWindow['seasonName'].update(today.seasonName())
-        controlWindow['season'].update(str(today.season+1))
-        controlWindow['cycle'].update(str(today.cycle+1))
-        controlWindow['dayName'].update(today.dayName())
-        controlWindow['day'].update(str(today.day+1))
-        controlWindow['hour'].update(str(today.hour))
 
 displayWindow[today.dayName()].update(background_color=theme_button_color()[1])
 
 while True:
     event, values = controlWindow.read()
-    displayWindow[today.dayName()].update(background_color=theme_background_color())  
+    displayWindow[today.dayName()].update(background_color=theme_background_color()) 
+
+    try:
+        today.year = int(values['year'])
+    except: 
+        0
+
+    try:
+        today.season = int(values['season'])-1
+    except: 
+        0
+
+    try:
+        today.cycle = int(values['cycle'])-1
+    except: 
+        0
+
+    try:
+        today.day = int(values['day'])-1
+    except: 
+        0 
+
+    try:
+        today.hour = int(values['hour'])
+    except: 
+        0    
+
     if event == sg.WIN_CLOSED or event == 'Close':
         break
     elif event == 'nextDay':               
@@ -95,34 +120,18 @@ while True:
     elif event == 'Send to Back':
         displayWindow.SendToBack()
         
-    else:
-        try:
-            today.year = int(values['year'])
-        except: 
-            0
-
-        try:
-            today.season = int(values['season'])-1
-        except: 
-            0
-
-        try:
-            today.cycle = int(values['cycle'])-1
-        except: 
-            0
-
-        try:
-            today.day = int(values['day'])-1
-        except: 
-            0 
-
-        try:
-            today.hour = int(values['hour'])
-        except: 
-            0      
     
     today = today.plus(hd.HypDate())
-    updateControl()
+    weather = values['weather']
+    location = values['location']
+
+    controlWindow['year'].update(str(today.year))
+    controlWindow['seasonName'].update(today.seasonName())
+    controlWindow['season'].update(str(today.season+1))
+    controlWindow['cycle'].update(str(today.cycle+1))
+    controlWindow['dayName'].update(today.dayName())
+    controlWindow['day'].update(str(today.day+1))
+    controlWindow['hour'].update(str(today.hour))
 
     displayWindow['date'].update(today.dateName())
     displayWindow['hour'].update(str(today.hour))
@@ -131,6 +140,10 @@ while True:
     displayWindow[today.dayName()].update(
         background_color=theme_button_color()[1])
 
-Saving.save(today.toList())
+
+Saving.save(
+    today.toList(),
+    weather or '',
+    location or '')
 controlWindow.close()
 displayWindow.close()

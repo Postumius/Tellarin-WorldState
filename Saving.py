@@ -1,23 +1,33 @@
-def save(ls):
-    def toString(ls):
+def save(ls, weather, location):
+    def toLine(ls):
         s = ''
         for n in ls:
             s = s + str(n) + ' '
         return s
     
     file = open("today.txt", 'w')
-    file.write(toString(ls))
+    file.write("{}\n{}\n{}".
+        format(toLine(ls), weather, location))
 
 def load():
-    def fromString(s):
+    def fromLine(s):
         ls = []
         for n in s.split():
             ls.append(int(n))
         return ls
+
+    blank = ([0, 0, 0, 0, 0, 0], '', '')
     
-    file = open("today.txt", 'r')
-    s = file.read()
-    if s == '':
-        return [0, 0, 0, 0, 0, 0]
-    else:
-        return fromString(s)
+    try:
+        file = open("today.txt", 'r')
+        s = file.readline()
+        if s == '':
+            return blank
+        else:
+            return (
+                fromLine(s),
+                file.readline().strip(),
+                file.readline()
+            )    
+    except:
+        return blank
