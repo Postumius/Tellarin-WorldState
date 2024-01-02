@@ -8,7 +8,7 @@ import Saving
 (ls, weather, location) = Saving.load()
 today = hd.HypDate.fromList(ls)
 
-controlLayout = [
+control_state_layout = [
     [sg.Text('year:'), sg.Input(size=(5,1), key='year',
         default_text=str(today.year))],
     [sg.Text('season:'), sg.Input(size=(5,1), key='season',
@@ -31,12 +31,38 @@ controlLayout = [
     [sg.Text('Location:'), 
      sg.Input(size=(25,1), key='location',
         default_text=location)],
-    [sg.Button('Bring to Front'), sg.Button('Send to Back')],
-    [sg.Button('Update'), sg.Button('Close')]
 ]
-controlWindow = sg.Window('Controls', controlLayout)
 
-displayColumn = [    
+control_ac_layout = [
+    [
+        sg.Column(
+            [[sg.Text('name'),],] +
+            [[sg.Input(justification='right', key='name ' + str(i))] for i in range(6)],
+            element_justification='right',
+        ),
+        sg.Column(
+            [[sg.Text('AC'),],] +
+            [[sg.Input(size=(2,1), key='AC ' + str(i))] for i in range(6)]
+        ),
+    ]
+]
+
+control_layout = [
+    [sg.TabGroup(
+        [
+            [sg.Tab('Tab 1', control_state_layout, tooltip='tip', key="state tab"),
+             sg.Tab('Tab 2', control_ac_layout, tooltip='TIP2', key="ac tab")],    
+        ],
+        enable_events=True,
+        key="active tab")],
+    [sg.Button('Bring to Front'), sg.Button('Send to Back')],
+    [sg.Button('Update'), sg.Button('Close')],
+]
+controlWindow = sg.Window('Controls', control_layout)
+
+
+
+display_state_column = [    
     [sg.Text('Date: '), 
      sg.Text(today.dateName(), size=(25,1), key='date')],
     [sg.Text('Hour: '),
@@ -58,13 +84,39 @@ for dayName in hd.dayNames:
             expand_x=True, element_justification='center'
         ))
 
-displayLayout = [ 
+display_state_layout = [ 
     dayList,
     [sg.Text(key='-EXPAND-', font='ANY 1', pad=(0, 0))],
-    [sg.Column(displayColumn, vertical_alignment='center', key='-C-')]
+    [sg.Column(display_state_column, vertical_alignment='center', key='-C-')]
 ]
 
-displayWindow = sg.Window('Display', displayLayout, 
+display_ac_column = [
+    [
+        sg.Column(
+            [[sg.Text('name: '),],] +
+            [[sg.Text(key='name ' + str(i))] for i in range(6)],
+            element_justification='right',
+        ),
+        sg.Column(
+            [[sg.Text('AC'),],] +
+            [[sg.Text(key='AC ' + str(i))] for i in range(6)]
+        ),
+    ]
+]
+
+display_ac_layout = [
+    [sg.Text(key='-EXPAND-', font='ANY 1', pad=(0, 0))],
+    [sg.Column(display_ac_column, vertical_alignment='center', key='-C-')],
+]
+
+display_layout = [
+    [sg.Column(display_state_layout, key="state tab"),
+     sg.Column(display_ac_layout, visible=False, key="ac tab")]
+]
+
+display_col_keys = ['state tab', 'ac tab']
+
+displayWindow = sg.Window('Display', display_layout, 
     finalize=True, resizable=True, 
     font=('helvetica', 50),
     auto_size_text=True,
@@ -72,12 +124,12 @@ displayWindow = sg.Window('Display', displayLayout,
 
 displayWindow['-C-'].expand(True, True, True)
 displayWindow['-EXPAND-'].expand(True, True, True)       
-
-
 displayWindow[today.dayName()].update(background_color=theme_button_color()[1])
 
 while True:
     event, values = controlWindow.read()
+    print(values)
+    print(event)
     displayWindow[today.dayName()].update(background_color=theme_background_color()) 
 
     try:
@@ -119,7 +171,12 @@ while True:
         displayWindow.BringToFront()
     elif event == 'Send to Back':
         displayWindow.SendToBack()
-        
+    elif event == 'active tab':
+        for key in display_col_keys:
+            if key == values['active tab']:
+                displayWindow[key].update(visible=True)
+            else:
+                displayWindow[key].update(visible=False)
     
     today = today.plus(hd.HypDate())
     weather = values['weather']
@@ -139,6 +196,11 @@ while True:
     displayWindow['location'].update(values['location'])
     displayWindow[today.dayName()].update(
         background_color=theme_button_color()[1])
+    for i in range(6):
+        name = 'name ' + str(i)
+        ac = 'AC ' + str(i)
+        displayWindow[name].update(values[name] + ': ' if values[name] else '')
+        displayWindow[ac].update(values[ac])
 
 
 Saving.save(
