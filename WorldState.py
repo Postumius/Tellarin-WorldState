@@ -36,7 +36,7 @@ control_state_layout = [
 control_ac_layout = [
     [
         sg.Column(
-            [[sg.Text('name'),],] +
+            [[sg.Text('Name'),],] +
             [[sg.Input(justification='right', key='name ' + str(i))] for i in range(6)],
             element_justification='right',
         ),
@@ -50,8 +50,8 @@ control_ac_layout = [
 control_layout = [
     [sg.TabGroup(
         [
-            [sg.Tab('Tab 1', control_state_layout, tooltip='tip', key="state tab"),
-             sg.Tab('Tab 2', control_ac_layout, tooltip='TIP2', key="ac tab")],    
+            [sg.Tab('World State', control_state_layout, tooltip='World State', key="state tab"),
+             sg.Tab('ACs', control_ac_layout, tooltip='ACs', key="ac tab")],    
         ],
         enable_events=True,
         key="active tab")],
@@ -93,7 +93,7 @@ display_state_layout = [
 display_ac_column = [
     [
         sg.Column(
-            [[sg.Text('name: '),],] +
+            [[sg.Text('Name: '),],] +
             [[sg.Text(key='name ' + str(i))] for i in range(6)],
             element_justification='right',
         ),
@@ -128,8 +128,8 @@ displayWindow[today.dayName()].update(background_color=theme_button_color()[1])
 
 while True:
     event, values = controlWindow.read()
-    print(values)
-    print(event)
+    #print(values)
+    #print(event)
     displayWindow[today.dayName()].update(background_color=theme_background_color()) 
 
     try:
